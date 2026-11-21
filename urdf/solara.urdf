@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+  Minimal Solara description. Its only real job: tell ROS where the lidar is.
+
+  base_link = on the floor, at the robot's center of rotation
+              (halfway between front/rear axles and left/right wheels).
+  Axes: x forward, y left, z up. Meters.
+
+  TODO: set the lidar height (z) to the measured floor-to-lidar-head distance.
+        If the lidar's 0° mark faces backward, set rpy="0 0 3.14159".
+-->
+<robot name="solara">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.05"/>
+      <geometry><box size="0.40 0.30 0.10"/></geometry>
+    </visual>
+  </link>
+
+  <link name="laser"/>
+
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="0.0 0.0 0.20" rpy="0 0 0"/>
+  </joint>
+</robot>

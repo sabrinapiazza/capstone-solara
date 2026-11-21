@@ -1,0 +1,4 @@
+# Gives the Pico a fixed name: /dev/solara_pico
+# Install:  sudo cp scripts/99-solara.rules /etc/udev/rules.d/ && sudo udevadm control --reload && sudo udevadm trigger
+# Then set serial_port: /dev/solara_pico in config/base_params.yaml
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2e8a", SYMLINK+="solara_pico"

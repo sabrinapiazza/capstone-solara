@@ -1,0 +1,2 @@
+# Add your sensor's library here, e.g.:
+# adafruit-circuitpython-sht31d

@@ -1,0 +1,15 @@
+# colcon output (only if someone builds inside the repo by mistake)
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+sensors/.venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
