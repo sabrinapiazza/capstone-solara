@@ -6,7 +6,9 @@ Starts the whole Solara robot.
 
 Starts: robot_state_publisher (URDF), lidar driver, base_node,
         SLAM Toolbox (mapping or localization), Nav2 (planner, controller,
-        behaviors, BT navigator) + lifecycle manager.
+        behaviors, BT navigator) + lifecycle manager, and foxglove_bridge
+        (view the map from a laptop: Foxglove -> ws://solara.local:8765).
+        Add foxglove:=false to skip the bridge.
 """
 
 import os
@@ -91,7 +93,16 @@ def launch_setup(context):
              parameters=[{'autostart': True, 'node_names': nav2_nodes}]),
     ]
 
-    return [robot_state_publisher, lidar, base, slam, *nav2]
+    # ---------- Foxglove: see the map, scan and robot from a laptop ----------
+    extras = []
+    if LaunchConfiguration('foxglove').perform(context).lower() == 'true':
+        extras.append(Node(
+            package='foxglove_bridge',
+            executable='foxglove_bridge',
+            parameters=[{'port': 8765}],
+        ))
+
+    return [robot_state_publisher, lidar, base, slam, *nav2, *extras]
 
 
 def generate_launch_description():
@@ -101,7 +112,11 @@ def generate_launch_description():
         DeclareLaunchArgument('map', default_value='~/solara_ws/src/solara-ros/maps/room',
                               description='saved map path, no file extension'),
         DeclareLaunchArgument('lidar_port', default_value='/dev/ttyUSB0'),
+        DeclareLaunchArgument('foxglove', default_value='true',
+                              description='start foxglove_bridge on port 8765'),
         DeclareLaunchArgument('lidar_baud', default_value='115200',
                               description='RPLIDAR A1/A2: 115200, A3: 256000, S2: 1000000'),
+        DeclareLaunchArgument('foxglove', default_value='true',
+                              description='start foxglove_bridge on port 8765'),
         OpaqueFunction(function=launch_setup),
     ])

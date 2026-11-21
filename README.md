@@ -22,6 +22,8 @@ Lidar ------/scan------> (SLAM + Nav2 costmaps)
 | SLAM Toolbox | builds the room map; publishes `map -> odom` | installed, `config/slam_*.yaml` |
 | Nav2 | plans paths, avoids obstacles, publishes `/cmd_vel` | installed, `config/nav2_params.yaml` |
 | `sensors/env_sensor.py` | reads the environmental sensor and prints it | us; plain Python, **not ROS** |
+| `foxglove_bridge` | lets Foxglove on a laptop show the map, scan and robot, and send goals | installed, started by the launch file |
+| `foxglove_bridge` | streams topics to Foxglove on your laptop so you can see the map | installed, started by the launch file |
 
 **TF tree** (each link has exactly one owner):
 
@@ -121,6 +123,15 @@ ros2 launch solara_pkg robot.launch.py mode:=localization
 
 To find a spot's coordinates: drive there with teleop, then `ros2 run tf2_ros tf2_echo map base_link`.
 
+**See the robot in Foxglove**
+
+1. Install the Foxglove app on your laptop (foxglove.dev). Your laptop must be on the same hotspot as the Pi.
+2. Open connection → **Foxglove WebSocket** → `ws://solara.local:8765`
+3. Add a **3D** panel. Turn on `/map`, `/scan`, the TF frames and Nav2's `/plan`.
+4. To send a goal by clicking: in the 3D panel's publish tool, choose **Pose**, set its topic to `/goal_pose`, then click a spot and drag to set the heading. Nav2 drives there.
+
+Foxglove is optional: everything still works from the terminal. Start without it using `foxglove:=false`.
+
 **3. Environmental sensor (separate, no ROS)**
 
 ```bash
@@ -129,6 +140,17 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python3 env_sensor.py
 ```
+
+## Seeing the map: Foxglove
+
+The launch file starts `foxglove_bridge` on port 8765 (turn it off with `foxglove:=false`).
+
+1. On your laptop, open Foxglove (desktop app or the web app in Chrome). It's free for students with a .edu email, or on the free plan.
+2. **Open connection → Foxglove WebSocket →** `ws://solara.local:8765` (laptop on the same hotspot as the Pi).
+3. Add a **3D panel** and turn on `/map`, `/scan` and the TF frames. Set the display frame to `map`.
+4. **Send goals by clicking:** in the 3D panel's publish tool, choose **Pose**, topic `/goal_pose`, then click and drag on the map. Nav2 drives there.
+
+Over a phone hotspot, stick to the map, scan and TF. Don't stream camera images or point clouds.
 
 ## Calibration tests
 
@@ -145,6 +167,21 @@ python3 env_sensor.py
 
 The Pico must stop the motors if no `V` arrives for 0.5 s.
 
+## Start-up checklist
+
+```bash
+ssh youruser@solara.local
+tmux new -s robot                      # or: tmux attach -t robot
+ros2 launch solara_pkg robot.launch.py mode:=localization
+#   Ctrl-b c  → new tmux window, then e.g. ./scripts/goto.sh 2.0 1.5
+#   Ctrl-b d  → detach; robot keeps running
+# Laptop: Foxglove → ws://solara.local:8765
+
+# Shut down
+#   Ctrl-c in the launch window (wheels stop)
+sudo shutdown now                      # wait for the green LED to stop before unplugging
+```
+
 ## Useful commands
 
 ```bash
@@ -152,4 +189,9 @@ ros2 topic echo /odom            # is odometry changing?
 ros2 topic hz /scan              # is the lidar publishing?
 ros2 run tf2_ros tf2_echo map base_link   # where is the robot?
 ros2 node list                   # is everything running?
+```
+
+`goto.sh` still works when you don't have Foxglove open.
+
+```bash
 ```
